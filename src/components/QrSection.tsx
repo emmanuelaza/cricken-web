@@ -2,9 +2,6 @@
 
 import { QRCodeSVG } from "qrcode.react";
 
-// TODO: cambiar por el dominio real cuando esté listo.
-const CATALOGO_URL = "https://cricken.vercel.app/catalogo";
-
 const previewItems = [
   { emoji: "🧀", nombre: "Dori Dog", precio: "$10.000" },
   { emoji: "🥔", nombre: "Papa Dog", precio: "$12.000" },
@@ -85,7 +82,13 @@ export function QrSection() {
                 }}
               >
                 <QRCodeSVG
-                  value={CATALOGO_URL}
+                  value={
+                    process.env.NEXT_PUBLIC_BASE_URL
+                      ? `${process.env.NEXT_PUBLIC_BASE_URL}/catalogo`
+                      : typeof window !== "undefined"
+                        ? `${window.location.origin}/catalogo`
+                        : "/catalogo"
+                  }
                   size={180}
                   fgColor="#6B21A8"
                   bgColor="#0A0A0A"
