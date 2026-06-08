@@ -12,8 +12,9 @@ export function CartDrawer() {
   const [mostrarForm, setMostrarForm] = useState(false);
   const pathname = usePathname();
 
-  // /menu-digital es solo informativo (sin carrito ni pedidos).
-  if (pathname?.startsWith("/menu-digital")) return null;
+  // /menu-digital (solo informativo) y /admin (CRM) no llevan carrito.
+  if (pathname?.startsWith("/menu-digital") || pathname?.startsWith("/admin"))
+    return null;
 
   return (
     <>

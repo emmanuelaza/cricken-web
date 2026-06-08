@@ -7,8 +7,9 @@ export function CartButton() {
   const { count, abrirCarrito } = useCart();
   const pathname = usePathname();
 
-  // /menu-digital es solo informativo (sin carrito ni pedidos).
-  if (pathname?.startsWith("/menu-digital")) return null;
+  // /menu-digital (solo informativo) y /admin (CRM) no llevan carrito.
+  if (pathname?.startsWith("/menu-digital") || pathname?.startsWith("/admin"))
+    return null;
 
   // Sin productos no mostramos el botón (evita estorbar en /catalogo, etc.).
   if (count === 0) return null;

@@ -64,6 +64,8 @@ export interface PedidoProducto {
   cantidad: number;
 }
 
+export type EstadoPedido = "nuevo" | "confirmado" | "entregado" | "cancelado";
+
 export interface Pedido {
   id: string;
   cliente_nombre: string;
@@ -71,8 +73,26 @@ export interface Pedido {
   sede: string;
   productos: PedidoProducto[];
   total: number;
-  estado: string;
+  estado: EstadoPedido | string;
   canal: string;
   notas: string | null;
   created_at: string;
+}
+
+export type Segmento = "nuevo" | "regular" | "vip" | "en_riesgo";
+
+export interface Cliente {
+  id: string;
+  nombre: string;
+  telefono: string | null;
+  email: string | null;
+  sede_favorita: string | null;
+  segmento: Segmento | string;
+  total_pedidos: number;
+  total_gastado: number;
+  rating_promedio: number | null;
+  notas: string | null;
+  activo: boolean;
+  created_at: string;
+  updated_at?: string;
 }
