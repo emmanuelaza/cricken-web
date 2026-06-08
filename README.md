@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cricken — Perros Coreanos 🌭
 
-## Getting Started
+Sitio web + catálogo QR para Cricken (perros coreanos, Medellín).
+Next.js 16 (App Router) · TypeScript · Tailwind v4.
 
-First, run the development server:
+Hoy el sitio lee **datos estáticos** (el seed del setup de Supabase). Está
+construido para cambiar a Supabase sin tocar la interfaz.
+
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # build de producción
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Páginas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Ruta                     | Descripción                                          |
+|--------------------------|------------------------------------------------------|
+| `/`                      | Landing: hero, menú, combos, sedes, reseñas          |
+| `/catalogo`              | Catálogo mobile-first para el QR (`?sede=centro`). Registra cada visita en `pedidos_qr`. |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estructura
 
-## Learn More
+```
+src/
+  app/                 páginas y rutas
+    page.tsx           landing (secciones async con <Suspense> + skeletons)
+    catalogo/page.tsx  catálogo QR (registra visita en pedidos_qr)
+    catalogo/loading.tsx  skeleton de la ruta
+  components/          Header, Footer, Hero, *Card, Badge, Section, Skeletons
+  data/
+    types.ts           tipos de dominio (espejo de las tablas de Supabase)
+    menu.ts            seed de referencia (ya NO se usa en runtime)
+  lib/
+    data.ts            ⭐ acceso a datos — consultas live a Supabase
+    format.ts          formato de pesos COP
+    site.ts            contacto, redes y links de pedido (placeholders)
+    supabase/          client.ts (browser) + server.ts (RSC)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Supabase (conectado)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+La app lee en vivo desde Supabase vía [src/lib/data.ts](src/lib/data.ts)
+(`productos`, `combos` + `combo_items`, `sedes`, `resenas`) usando el cliente
+servidor. Cada visita a `/catalogo` inserta una fila en `pedidos_qr`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Las claves van en `.env.local` (no versionado). Si una tabla aparece vacía en la
+web, corre sus `INSERT` (Paso 4) y verifica sus políticas `SELECT` (Paso 5) en el
+SQL Editor de Supabase.
 
-## Deploy on Vercel
+## Pendiente / placeholders a reemplazar
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/lib/site.ts`: número de WhatsApp, links de Instagram/TikTok/Rappi/DiDi.
+- Imágenes reales de producto (hoy se usan emojis).
+- CRM (`clientes` / `pedidos` con auth) — siguiente fase del setup.

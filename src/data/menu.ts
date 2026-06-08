@@ -1,0 +1,225 @@
+// Datos estáticos iniciales — copiados del seed SQL del setup de Supabase.
+// Cuando Supabase esté listo, estos datos se reemplazan desde src/lib/data.ts
+// sin tocar las páginas ni los componentes.
+
+import type { Combo, Producto, Resena, Sede } from "./types";
+
+export const productos: Producto[] = [
+  {
+    id: "dori-dog",
+    nombre: "Dori Dog",
+    descripcion:
+      "Apanado con Doritos crocantes. Relleno a elegir: queso, salchicha o combinado.",
+    precio: 10000,
+    emoji: "🧀",
+    categoria: "salado",
+    badge_texto: "⭐ Popular",
+    badge_tipo: "yellow",
+    activo: true,
+    orden: 1,
+  },
+  {
+    id: "papa-dog",
+    nombre: "Papa Dog",
+    descripcion:
+      "Apanado con papas bastón y espolvoreado de azúcar. Dulce-salado irresistible.",
+    precio: 12000,
+    emoji: "🥔",
+    categoria: "dulce",
+    badge_texto: "⭐ Popular",
+    badge_tipo: "yellow",
+    activo: true,
+    orden: 2,
+  },
+  {
+    id: "ramen-dog",
+    nombre: "Ramen Dog",
+    descripcion: "Masa apanada con ramen coreano crocante. Textura única.",
+    precio: 10000,
+    emoji: "🍜",
+    categoria: "salado",
+    badge_texto: null,
+    badge_tipo: null,
+    activo: true,
+    orden: 3,
+  },
+  {
+    id: "crispi-dog",
+    nombre: "Crispi Dog",
+    descripcion: "Panko + arroz inflado + azúcar. Supercrujiente. Relleno a elegir.",
+    precio: 14000,
+    emoji: "✨",
+    categoria: "dulce",
+    badge_texto: null,
+    badge_tipo: null,
+    activo: true,
+    orden: 4,
+  },
+  {
+    id: "takis-dog",
+    nombre: "Takis Dog",
+    descripcion: "Banderilla apanada con Takis. Picante, intenso y adictivo.",
+    precio: 9250,
+    emoji: "🌶️",
+    categoria: "picante",
+    badge_texto: "🔥 Oferta",
+    badge_tipo: "purple",
+    activo: true,
+    orden: 5,
+  },
+  {
+    id: "choco-dog",
+    nombre: "Choco Dog",
+    descripcion:
+      "Apanado con chocókrispi. El favorito dulce. Relleno de queso o salchicha.",
+    precio: 11000,
+    emoji: "🍫",
+    categoria: "dulce",
+    badge_texto: null,
+    badge_tipo: null,
+    activo: true,
+    orden: 6,
+  },
+  {
+    id: "bocadillo-dog",
+    nombre: "Bocadillo Dog",
+    descripcion:
+      "Queso mozzarella y bocadillo en panko. Colombia + Corea en un bocado.",
+    precio: 11000,
+    emoji: "🍬",
+    categoria: "especial",
+    badge_texto: null,
+    badge_tipo: null,
+    activo: true,
+    orden: 7,
+  },
+  {
+    id: "corn-dulce-dog",
+    nombre: "Corn Dulce Dog",
+    descripcion: "Masa con panko, maíz dulce y azúcar. El corn dog más tradicional.",
+    precio: 12000,
+    emoji: "🌽",
+    categoria: "dulce",
+    badge_texto: null,
+    badge_tipo: null,
+    activo: true,
+    orden: 8,
+  },
+];
+
+export const combos: Combo[] = [
+  {
+    id: "combo-personal",
+    tier: "Para 1 persona",
+    nombre: "PERSONAL",
+    precio: 22000,
+    precio_label: "$22.000 por persona",
+    featured: false,
+    activo: true,
+    orden: 1,
+    combo_items: [
+      { texto: "1 perro coreano a elegir", orden: 1 },
+      { texto: "Porción de papas a la francesa", orden: 2 },
+      { texto: "Gaseosa 400 ml", orden: 3 },
+    ],
+  },
+  {
+    id: "combo-pareja",
+    tier: "Para 2 personas",
+    nombre: "PAREJA",
+    precio: 43000,
+    precio_label: "$21.500 por persona",
+    featured: false,
+    activo: true,
+    orden: 2,
+    combo_items: [
+      { texto: "2 perros coreanos a elegir", orden: 1 },
+      { texto: "2 porciones de papas", orden: 2 },
+      { texto: "2 gaseosas 400 ml", orden: 3 },
+    ],
+  },
+  {
+    id: "combo-familiar",
+    tier: "Para 6 personas",
+    nombre: "FAMILIAR",
+    precio: 96000,
+    precio_label: "Solo $16.000 por persona",
+    featured: true,
+    activo: true,
+    orden: 3,
+    combo_items: [
+      { texto: "6 perros coreanos a elegir", orden: 1 },
+      { texto: "3 porciones de papas", orden: 2 },
+      { texto: "Gaseosa familiar 1.5 Lt", orden: 3 },
+    ],
+  },
+];
+
+export const sedes: Sede[] = [
+  {
+    id: "sede-centro",
+    nombre: "Sede Centro — Candelaria",
+    direccion: "Calle 49 # 41-86",
+    descripcion: "Junto a Estación Tranvía Pabellón del Agua",
+    emoji: "🚃",
+    tag: "Sede principal",
+    activo: true,
+    orden: 1,
+  },
+  {
+    id: "sede-manrique",
+    nombre: "Sede Manrique",
+    direccion: "Calle 77 # 32-03",
+    descripcion: "Barrio Manrique, Medellín",
+    emoji: "🏘️",
+    tag: "Punto norte",
+    activo: true,
+    orden: 2,
+  },
+  {
+    id: "food-truck",
+    nombre: "Food Truck",
+    direccion: "Calle 66 # 39-75",
+    descripcion: "Disponible para eventos y zonas de la ciudad",
+    emoji: "🚚",
+    tag: "Móvil",
+    activo: true,
+    orden: 3,
+  },
+];
+
+export const resenas: Resena[] = [
+  {
+    id: "resena-valentina",
+    autor: "Valentina T.",
+    initials: "VT",
+    plataforma: "Google · Sede Centro",
+    texto:
+      "Excelentes perros coreanos, gran diversidad de cubiertas y salsas. Precios accesibles y hay combos. Muy buen lugar.",
+    rating: 5,
+    activo: true,
+    orden: 1,
+  },
+  {
+    id: "resena-carlos",
+    autor: "Carlos M.",
+    initials: "CM",
+    plataforma: "Rappi · 4.4/5",
+    texto:
+      "Masa bien aireada y bien fritos, queso y salchicha de buena calidad. No se sienten grasosos. Recomendado la mayo-sriracha.",
+    rating: 5,
+    activo: true,
+    orden: 2,
+  },
+  {
+    id: "resena-lola",
+    autor: "@lolacarolafood",
+    initials: "LC",
+    plataforma: "TikTok · 19.5K likes",
+    texto:
+      "QUESUDO y con mucho flow, único en Medallo. El chocókrispi es top. Hacen domicilio a toda la ciudad.",
+    rating: 5,
+    activo: true,
+    orden: 3,
+  },
+];
