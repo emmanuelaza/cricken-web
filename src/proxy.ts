@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Protege todas las rutas /admin/* (excepto /admin/login).
-export async function middleware(request: NextRequest) {
+// (Next 16 renombró el convención `middleware` → `proxy`.)
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/admin") || pathname === "/admin/login") {

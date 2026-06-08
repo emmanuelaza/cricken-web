@@ -125,21 +125,22 @@ section[id] {
 
 @keyframes shimmer {
   0% {
-    background-position: -400px 0;
+    background-position: 200% 0;
   }
   100% {
-    background-position: 400px 0;
+    background-position: -200% 0;
   }
 }
 .admin-skeleton {
   background: linear-gradient(
     90deg,
-    #1a1a1a 0%,
-    #251a33 50%,
-    #1a1a1a 100%
+    #1a1a1a 25%,
+    rgba(107, 33, 168, 0.15) 50%,
+    #1a1a1a 75%
   );
-  background-size: 800px 100%;
-  animation: shimmer 1.4s infinite linear;
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
 }
 
 @keyframes toast-in {

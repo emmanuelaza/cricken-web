@@ -1,6 +1,7 @@
 // Capa de datos del CRM — lee Supabase con la sesión autenticada del admin
 // (cookies del cliente servidor). Requiere las políticas RLS "admin lee ..."
-// del Paso 7. Si una consulta falla, devuelve valores vacíos.
+// del Paso 7. Lanza el error en fallos reales para que la página muestre
+// <ErrorState>; "no encontrado" devuelve null (sin error).
 
 import "server-only";
 import type { Cliente, Pedido, Producto } from "@/data/types";
@@ -12,10 +13,7 @@ export async function getPedidosAdmin(): Promise<Pedido[]> {
     .from("pedidos")
     .select("*")
     .order("created_at", { ascending: false });
-  if (error) {
-    console.error("[getPedidosAdmin]", error.message);
-    return [];
-  }
+  if (error) throw new Error(error.message);
   return (data as Pedido[]) ?? [];
 }
 
@@ -25,12 +23,9 @@ export async function getPedidoAdmin(id: string): Promise<Pedido | null> {
     .from("pedidos")
     .select("*")
     .eq("id", id)
-    .single();
-  if (error) {
-    console.error("[getPedidoAdmin]", error.message);
-    return null;
-  }
-  return data as Pedido;
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as Pedido) ?? null;
 }
 
 export async function getClientesAdmin(): Promise<Cliente[]> {
@@ -39,10 +34,7 @@ export async function getClientesAdmin(): Promise<Cliente[]> {
     .from("clientes")
     .select("*")
     .order("total_gastado", { ascending: false });
-  if (error) {
-    console.error("[getClientesAdmin]", error.message);
-    return [];
-  }
+  if (error) throw new Error(error.message);
   return (data as Cliente[]) ?? [];
 }
 
@@ -56,12 +48,9 @@ export async function getClienteAdmin(
     .from("clientes")
     .select("*, pedidos(id, total, productos, estado, canal, created_at)")
     .eq("id", id)
-    .single();
-  if (error) {
-    console.error("[getClienteAdmin]", error.message);
-    return null;
-  }
-  return data as ClienteConPedidos;
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return (data as ClienteConPedidos) ?? null;
 }
 
 export async function getProductosAdmin(): Promise<Producto[]> {
@@ -70,10 +59,7 @@ export async function getProductosAdmin(): Promise<Producto[]> {
     .from("productos")
     .select("*")
     .order("orden");
-  if (error) {
-    console.error("[getProductosAdmin]", error.message);
-    return [];
-  }
+  if (error) throw new Error(error.message);
   return (data as Producto[]) ?? [];
 }
 
@@ -95,13 +81,16 @@ const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 export async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
-  const [{ data: pedidosRaw }, { data: clientesRaw }] = await Promise.all([
+  const [pedidosRes, clientesRes] = await Promise.all([
     supabase.from("pedidos").select("*"),
     supabase.from("clientes").select("id, segmento, created_at"),
   ]);
 
-  const pedidos = (pedidosRaw as Pedido[]) ?? [];
-  const clientes = (clientesRaw as Cliente[]) ?? [];
+  if (pedidosRes.error) throw new Error(pedidosRes.error.message);
+  if (clientesRes.error) throw new Error(clientesRes.error.message);
+
+  const pedidos = (pedidosRes.data as Pedido[]) ?? [];
+  const clientes = (clientesRes.data as Cliente[]) ?? [];
 
   const hoy = new Date();
   const esHoy = (f: string) =>
@@ -119,7 +108,6 @@ export async function getDashboardData(): Promise<DashboardData> {
   ).length;
   const vip = clientes.filter((c) => c.segmento === "vip").length;
 
-  // Ventas por día (últimos 7 días, entregado)
   const semana: { dia: string; total: number }[] = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(hoy);
@@ -134,7 +122,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     semana.push({ dia: DIAS[d.getDay()], total });
   }
 
-  // Top productos desde productos jsonb
   const conteo = new Map<string, number>();
   for (const p of pedidos) {
     for (const item of p.productos ?? []) {

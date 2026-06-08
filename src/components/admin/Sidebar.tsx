@@ -9,8 +9,9 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useTransition } from "react";
+import { PageLoader } from "@/components/admin/PageLoader";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
 
@@ -41,6 +42,8 @@ export function Sidebar({
   onNavigate: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [navegando, startTransition] = useTransition();
   const { nuevos, marcarVistos } = useRealtimeOrders();
   const { logout } = useAdminAuth();
 
@@ -48,22 +51,34 @@ export function Sidebar({
     if (pathname?.startsWith("/admin/pedidos")) marcarVistos();
   }, [pathname, marcarVistos]);
 
+  // Navega mostrando el PageLoader instantáneamente.
+  const irA = (href: string) => {
+    onNavigate();
+    if (href === pathname) return;
+    startTransition(() => router.push(href));
+  };
+
   return (
-    <aside
-      className={`admin-scroll admin-sidebar fixed inset-y-0 left-0 z-40 flex w-[220px] flex-col overflow-y-auto transition-transform duration-200 md:translate-x-0 ${
-        open ? "translate-x-0" : "-translate-x-full"
-      }`}
-      style={{
-        background: "#111111",
-        borderRight: "1px solid rgba(107,33,168,0.2)",
-      }}
-    >
-      {/* Logo */}
-      <Link
-        href="/admin/dashboard"
-        onClick={onNavigate}
-        className="flex items-center gap-2 px-5 py-5"
+    <>
+      {navegando && <PageLoader />}
+      <aside
+        className={`admin-scroll admin-sidebar fixed inset-y-0 left-0 z-40 flex w-[220px] flex-col overflow-y-auto transition-transform duration-200 md:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+        style={{
+          background: "#111111",
+          borderRight: "1px solid rgba(107,33,168,0.2)",
+        }}
       >
+        {/* Logo */}
+        <Link
+          href="/admin/dashboard"
+          onClick={(e) => {
+            e.preventDefault();
+            irA("/admin/dashboard");
+          }}
+          className="flex items-center gap-2 px-5 py-5"
+        >
         <span className="text-2xl" aria-hidden>
           🌭
         </span>
@@ -96,7 +111,10 @@ export function Sidebar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={onNavigate}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    irA(item.href);
+                  }}
                   className="relative mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold transition-all"
                   style={{
                     background: activo ? "rgba(107,33,168,0.2)" : "transparent",
@@ -153,6 +171,7 @@ export function Sidebar({
           Cerrar sesión
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
