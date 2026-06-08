@@ -4,7 +4,6 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { ProductCard } from "@/components/ProductCard";
-import { QrSection } from "@/components/QrSection";
 import { ResenaCard } from "@/components/ResenaCard";
 import { Section } from "@/components/Section";
 import { SedeCard } from "@/components/SedeCard";
@@ -99,8 +98,6 @@ export default function Home() {
             </Suspense>
           </Section>
         </div>
-
-        <QrSection />
 
         <div style={{ background: "#111111" }}>
           <Section

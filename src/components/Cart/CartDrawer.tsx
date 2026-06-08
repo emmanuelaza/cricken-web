@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { OrderForm } from "@/components/Cart/OrderForm";
 import { useCart } from "@/context/CartContext";
@@ -9,6 +10,10 @@ import { pedidoWhatsappLink } from "@/lib/whatsapp";
 export function CartDrawer() {
   const { items, isOpen, total, eliminarItem, cerrarCarrito } = useCart();
   const [mostrarForm, setMostrarForm] = useState(false);
+  const pathname = usePathname();
+
+  // /menu-digital es solo informativo (sin carrito ni pedidos).
+  if (pathname?.startsWith("/menu-digital")) return null;
 
   return (
     <>
