@@ -7,7 +7,13 @@ import { TipoBadge } from "@/components/admin/pedidos/TipoBadge";
 import type { Pedido } from "@/data/types";
 import { formatFecha, formatPriceCOP } from "@/lib/format";
 
-export function OrderDetail({ pedido }: { pedido: Pedido }) {
+export function OrderDetail({
+  pedido,
+  notaCliente,
+}: {
+  pedido: Pedido;
+  notaCliente?: string | null;
+}) {
   const numero = `CR-${pedido.id.slice(0, 6).toUpperCase()}`;
   const tel = (pedido.cliente_telefono ?? "").replace(/\D/g, "");
   const waHref = `https://wa.me/${tel.startsWith("57") ? tel : "57" + tel}?text=${encodeURIComponent(
@@ -37,6 +43,19 @@ export function OrderDetail({ pedido }: { pedido: Pedido }) {
           <StatusChanger id={pedido.id} estado={pedido.estado} />
         </div>
       </div>
+
+      {notaCliente && (
+        <div
+          className="rounded-lg px-4 py-3 text-sm font-black"
+          style={{
+            background: "rgba(245,192,24,0.12)",
+            border: "1px solid rgba(245,192,24,0.5)",
+            color: "#F5C018",
+          }}
+        >
+          ⚠️ Este cliente tiene notas: {notaCliente}
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* Cliente */}

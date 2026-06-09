@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ErrorState } from "@/components/admin/ErrorState";
 import { OrderDetail } from "@/components/admin/pedidos/OrderDetail";
-import { getPedidoAdmin } from "@/lib/admin-data";
+import { getPedidoAdmin, getPrimeraNotaPorTelefono } from "@/lib/admin-data";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -34,7 +34,8 @@ export default async function PedidoDetailPage({
       );
     }
 
-    return <OrderDetail pedido={pedido} />;
+    const notaCliente = await getPrimeraNotaPorTelefono(pedido.cliente_telefono);
+    return <OrderDetail pedido={pedido} notaCliente={notaCliente} />;
   } catch (e) {
     return <ErrorState message={e instanceof Error ? e.message : undefined} />;
   }

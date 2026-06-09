@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/Badge";
 import { useCart } from "@/context/CartContext";
@@ -14,7 +15,7 @@ const categoriaLabel: Record<Producto["categoria"], string> = {
 };
 
 export function ProductCard({ producto }: { producto: Producto }) {
-  const { agregarItem } = useCart();
+  const { agregarItem, pedidosActivos } = useCart();
   const [added, setAdded] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -40,13 +41,24 @@ export function ProductCard({ producto }: { producto: Producto }) {
   return (
     <article className="card-cricken group flex flex-col overflow-hidden">
       {/* Área del emoji con overlay inferior */}
-      <div className="relative grid h-32 place-items-center" style={{ background: "#1A1A1A" }}>
-        <span
-          className="text-6xl transition-transform duration-300 group-hover:scale-110"
-          aria-hidden
-        >
-          {producto.emoji}
-        </span>
+      <div className="relative grid h-32 place-items-center overflow-hidden" style={{ background: "#1A1A1A" }}>
+        {producto.foto_url ? (
+          <Image
+            src={producto.foto_url}
+            alt={producto.nombre}
+            fill
+            unoptimized
+            sizes="(max-width: 640px) 50vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        ) : (
+          <span
+            className="text-6xl transition-transform duration-300 group-hover:scale-110"
+            aria-hidden
+          >
+            {producto.emoji}
+          </span>
+        )}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
@@ -84,8 +96,9 @@ export function ProductCard({ producto }: { producto: Producto }) {
           <button
             type="button"
             onClick={handleAdd}
+            disabled={!pedidosActivos}
             aria-label={`Agregar ${producto.nombre} al carrito`}
-            className={`grid h-[30px] w-[30px] place-items-center rounded-lg text-lg font-black text-white transition-colors ${
+            className={`grid h-[30px] w-[30px] place-items-center rounded-lg text-lg font-black text-white transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
               added ? "bg-green-500" : "bg-brand hover:bg-brand-light"
             }`}
           >

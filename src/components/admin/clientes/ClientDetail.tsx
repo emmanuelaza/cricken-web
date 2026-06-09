@@ -2,8 +2,10 @@
 
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { NotasClientes } from "@/components/admin/clientes/NotasClientes";
 import { SegmentBadge } from "@/components/admin/clientes/SegmentBadge";
 import { OrderStatusBadge } from "@/components/admin/pedidos/OrderStatusBadge";
+import type { NotaCliente } from "@/data/types";
 import type { ClienteConPedidos } from "@/lib/admin-data";
 import { formatFecha, formatPriceCOP } from "@/lib/format";
 import { calcularSegmento, diasDesde } from "@/lib/segmentos";
@@ -14,7 +16,13 @@ const panel = {
   border: "1px solid rgba(107,33,168,0.2)",
 } as const;
 
-export function ClientDetail({ cliente }: { cliente: ClienteConPedidos }) {
+export function ClientDetail({
+  cliente,
+  notas,
+}: {
+  cliente: ClienteConPedidos;
+  notas: NotaCliente[];
+}) {
   const pedidos = [...(cliente.pedidos ?? [])].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -111,6 +119,9 @@ export function ClientDetail({ cliente }: { cliente: ClienteConPedidos }) {
           )}
         </div>
       </div>
+
+      {/* Notas internas */}
+      <NotasClientes clienteId={cliente.id} notas={notas} />
 
       {/* Historial */}
       <div className="overflow-hidden" style={panel}>

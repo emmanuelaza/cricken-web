@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Badge } from "@/components/Badge";
 import type { Producto } from "@/data/types";
 import { formatPriceCOP } from "@/lib/format";
@@ -20,7 +21,21 @@ export function ProductRow({
       className="transition-colors hover:bg-[#222222]"
       style={{ borderTop: "1px solid rgba(107,33,168,0.1)" }}
     >
-      <td className="px-3 py-3 text-xl">{producto.emoji}</td>
+      <td className="px-3 py-3">
+        {producto.foto_url ? (
+          <Image
+            src={producto.foto_url}
+            alt={producto.nombre}
+            width={40}
+            height={40}
+            unoptimized
+            className="h-10 w-10 rounded-full object-cover"
+            style={{ border: "1px solid rgba(107,33,168,0.3)" }}
+          />
+        ) : (
+          <span className="text-xl">{producto.emoji}</span>
+        )}
+      </td>
       <td className="px-3 py-3 font-bold text-white">{producto.nombre}</td>
       <td className="px-3 py-3 font-bold capitalize" style={{ color: "#888888" }}>
         {producto.categoria}

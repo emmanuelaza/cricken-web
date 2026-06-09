@@ -22,6 +22,7 @@ interface CartContextValue {
   total: number;
   count: number;
   isOpen: boolean;
+  pedidosActivos: boolean;
   agregarItem: (item: CartItem) => void;
   eliminarItem: (id: string) => void;
   limpiarCarrito: () => void;
@@ -33,7 +34,13 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 const STORAGE_KEY = "cricken-cart";
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({
+  children,
+  pedidosActivos = true,
+}: {
+  children: React.ReactNode;
+  pedidosActivos?: boolean;
+}) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -98,6 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       total,
       count,
       isOpen,
+      pedidosActivos,
       agregarItem,
       eliminarItem,
       limpiarCarrito,
@@ -109,6 +117,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       total,
       count,
       isOpen,
+      pedidosActivos,
       agregarItem,
       eliminarItem,
       limpiarCarrito,

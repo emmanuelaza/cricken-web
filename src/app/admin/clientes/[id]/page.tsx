@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ClientDetail } from "@/components/admin/clientes/ClientDetail";
 import { ErrorState } from "@/components/admin/ErrorState";
-import { getClienteAdmin } from "@/lib/admin-data";
+import { getClienteAdmin, getNotasCliente } from "@/lib/admin-data";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -34,7 +34,8 @@ export default async function ClienteDetailPage({
       );
     }
 
-    return <ClientDetail cliente={cliente} />;
+    const notas = await getNotasCliente(cliente.id);
+    return <ClientDetail cliente={cliente} notas={notas} />;
   } catch (e) {
     return <ErrorState message={e instanceof Error ? e.message : undefined} />;
   }

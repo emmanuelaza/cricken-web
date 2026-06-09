@@ -14,6 +14,7 @@ export interface Producto {
   categoria: CategoriaProducto;
   badge_texto: string | null;
   badge_tipo: BadgeTipo | null;
+  foto_url?: string | null;
   activo: boolean;
   orden: number;
 }
@@ -99,4 +100,53 @@ export interface Cliente {
   activo: boolean;
   created_at: string;
   updated_at?: string;
+}
+
+// ── Configuración del negocio / horarios ────────────────────────────────
+export interface ConfigNegocio {
+  id: number;
+  pedidos_activos: boolean;
+  tiempo_entrega: number;
+  pedido_minimo: number;
+  mensaje_cerrado: string | null;
+}
+
+export interface Horario {
+  id: number;
+  dia: number; // 0=Domingo … 6=Sábado
+  apertura: string; // "10:00"
+  cierre: string; // "22:00"
+  activo: boolean;
+}
+
+// ── Usuarios admin ──────────────────────────────────────────────────────
+export type RolAdmin = "dueno" | "encargado" | "cajero";
+
+export interface AdminUser {
+  id: string;
+  nombre: string;
+  email: string;
+  rol: RolAdmin | string;
+  sede: string | null;
+  activo: boolean;
+  created_at?: string;
+}
+
+// ── Notas internas de clientes ──────────────────────────────────────────
+export interface NotaCliente {
+  id: string;
+  cliente_id: string;
+  texto: string;
+  autor: string | null;
+  created_at: string;
+}
+
+// ── Historial / auditoría ───────────────────────────────────────────────
+export interface HistorialEntry {
+  id: string;
+  accion: "crear" | "actualizar" | "eliminar" | string;
+  tabla: string;
+  registro_id: string | null;
+  usuario: string | null;
+  created_at: string;
 }

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ClosedBanner } from "@/components/ClosedBanner";
 import { ComboCard } from "@/components/ComboCard";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
@@ -71,6 +72,7 @@ export default function Home() {
   return (
     <>
       <Header />
+      <ClosedBanner />
       <main className="flex-1 bg-bg">
         <Hero />
         <StatsBar />

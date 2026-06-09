@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Nunito } from "next/font/google";
 import { Providers } from "@/components/Providers";
+import { getConfigNegocio } from "@/lib/data";
 import "./globals.css";
 
 const bebas = Bebas_Neue({
@@ -38,18 +39,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const config = await getConfigNegocio();
   return (
     <html
       lang="es"
       className={`${bebas.variable} ${nunito.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-white">
-        <Providers>{children}</Providers>
+        <Providers pedidosActivos={config.pedidos_activos}>{children}</Providers>
       </body>
     </html>
   );

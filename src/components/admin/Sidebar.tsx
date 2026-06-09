@@ -1,12 +1,19 @@
 "use client";
 
 import {
+  Clock,
+  Download,
+  Heart,
+  History,
+  Layers,
   LayoutDashboard,
   LogOut,
-  MapPin,
   ShoppingBag,
+  Ticket,
+  UserCog,
   UtensilsCrossed,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,7 +22,15 @@ import { PageLoader } from "@/components/admin/PageLoader";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useRealtimeOrders } from "@/hooks/useRealtimeOrders";
 
-const grupos = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  bell?: boolean;
+  proximo?: boolean;
+}
+
+const grupos: { label: string; items: NavItem[] }[] = [
   {
     label: "Principal",
     items: [
@@ -28,11 +43,26 @@ const grupos = [
     items: [
       { href: "/admin/clientes", label: "Clientes", icon: Users },
       { href: "/admin/menu", label: "Menú", icon: UtensilsCrossed },
+      { href: "/admin/combos", label: "Combos", icon: Layers },
+    ],
+  },
+  {
+    label: "Config",
+    items: [
+      { href: "/admin/horarios", label: "Horarios", icon: Clock },
+      { href: "/admin/usuarios", label: "Usuarios", icon: UserCog },
+      { href: "#", label: "Cupones", icon: Ticket, proximo: true },
+      { href: "#", label: "Fidelidad", icon: Heart, proximo: true },
+    ],
+  },
+  {
+    label: "Reportes",
+    items: [
+      { href: "/admin/reportes", label: "Exportar", icon: Download },
+      { href: "/admin/historial", label: "Historial", icon: History },
     ],
   },
 ];
-
-const sedes = ["Centro", "Manrique", "Food Truck"];
 
 export function Sidebar({
   open,
@@ -105,8 +135,25 @@ export function Sidebar({
               {g.label}
             </p>
             {g.items.map((item) => {
-              const activo = pathname?.startsWith(item.href);
               const Icon = item.icon;
+
+              if (item.proximo) {
+                return (
+                  <div
+                    key={item.label}
+                    className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold"
+                    style={{ color: "#555555" }}
+                  >
+                    <Icon size={18} />
+                    <span className="flex-1">{item.label}</span>
+                    <span className="text-[9px] font-black uppercase tracking-wide">
+                      próximo
+                    </span>
+                  </div>
+                );
+              }
+
+              const activo = pathname?.startsWith(item.href);
               return (
                 <Link
                   key={item.href}
@@ -139,25 +186,6 @@ export function Sidebar({
             })}
           </div>
         ))}
-
-        <div className="mb-5">
-          <p
-            className="px-2 pb-2 text-[10px] font-black uppercase tracking-widest"
-            style={{ color: "#555555" }}
-          >
-            Sedes
-          </p>
-          {sedes.map((s) => (
-            <div
-              key={s}
-              className="mb-1 flex items-center gap-3 px-3 py-2 text-sm font-bold"
-              style={{ color: "#888888" }}
-            >
-              <MapPin size={16} style={{ color: "#555555" }} />
-              {s}
-            </div>
-          ))}
-        </div>
       </nav>
 
       <div style={{ borderTop: "1px solid rgba(107,33,168,0.2)" }}>

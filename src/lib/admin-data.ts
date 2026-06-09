@@ -4,8 +4,98 @@
 // <ErrorState>; "no encontrado" devuelve null (sin error).
 
 import "server-only";
-import type { Cliente, Pedido, Producto } from "@/data/types";
+import type {
+  AdminUser,
+  Cliente,
+  Combo,
+  HistorialEntry,
+  NotaCliente,
+  Pedido,
+  Producto,
+} from "@/data/types";
 import { createClient } from "@/lib/supabase/server";
+
+// Usuarios admin (degrada a [] si la tabla aún no existe).
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("admin_users")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data as AdminUser[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// Historial de auditoría (degrada a [] si la tabla aún no existe).
+export async function getHistorial(): Promise<HistorialEntry[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("historial")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) return [];
+    return (data as HistorialEntry[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// Notas de un cliente (degrada a [] si la tabla aún no existe).
+export async function getNotasCliente(clienteId: string): Promise<NotaCliente[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("notas_clientes")
+      .select("*")
+      .eq("cliente_id", clienteId)
+      .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data as NotaCliente[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// Primera nota de un cliente buscado por teléfono (para el banner del pedido).
+export async function getPrimeraNotaPorTelefono(
+  telefono: string | null,
+): Promise<string | null> {
+  if (!telefono) return null;
+  try {
+    const supabase = await createClient();
+    const { data: cliente } = await supabase
+      .from("clientes")
+      .select("id")
+      .eq("telefono", telefono)
+      .maybeSingle();
+    if (!cliente) return null;
+    const { data: notas } = await supabase
+      .from("notas_clientes")
+      .select("texto")
+      .eq("cliente_id", cliente.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    return notas?.[0]?.texto ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getCombosAdmin(): Promise<Combo[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("combos")
+    .select("*, combo_items(texto, orden)")
+    .order("orden");
+  if (error) throw new Error(error.message);
+  return (data as Combo[]) ?? [];
+}
 
 export async function getPedidosAdmin(): Promise<Pedido[]> {
   const supabase = await createClient();

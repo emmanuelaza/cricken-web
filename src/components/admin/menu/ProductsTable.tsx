@@ -94,7 +94,7 @@ export function ProductsTable({
         <table className="w-full min-w-[680px] text-left text-sm">
           <thead>
             <tr style={{ color: "#555555" }}>
-              {["", "Nombre", "Categoría", "Precio", "Badge", "Acciones"].map(
+              {["Foto", "Nombre", "Categoría", "Precio", "Badge", "Acciones"].map(
                 (h, i) => (
                   <th
                     key={i}

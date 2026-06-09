@@ -13,8 +13,53 @@ import {
   resenas as resenasSeed,
   sedes as sedesSeed,
 } from "@/data/menu";
-import type { Combo, Producto, Resena, Sede } from "@/data/types";
+import type {
+  Combo,
+  ConfigNegocio,
+  Horario,
+  Producto,
+  Resena,
+  Sede,
+} from "@/data/types";
 import { createClient } from "@/lib/supabase/server";
+
+export const CONFIG_DEFAULT: ConfigNegocio = {
+  id: 1,
+  pedidos_activos: true,
+  tiempo_entrega: 35,
+  pedido_minimo: 0,
+  mensaje_cerrado: "Estamos cerrados por ahora. ¡Vuelve pronto! 🌭",
+};
+
+// Config del negocio (degrada a defaults si la tabla no existe).
+export async function getConfigNegocio(): Promise<ConfigNegocio> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("config_negocio")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return CONFIG_DEFAULT;
+    return data as ConfigNegocio;
+  } catch {
+    return CONFIG_DEFAULT;
+  }
+}
+
+export async function getHorarios(): Promise<Horario[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("horarios")
+      .select("*")
+      .order("dia");
+    if (error) return [];
+    return (data as Horario[]) ?? [];
+  } catch {
+    return [];
+  }
+}
 
 function ordenar<T extends { orden: number }>(arr: T[]): T[] {
   return [...arr].sort((a, b) => a.orden - b.orden);

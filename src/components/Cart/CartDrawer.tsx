@@ -9,7 +9,8 @@ import { formatCOP } from "@/lib/format";
 import { pedidoWhatsappLink } from "@/lib/whatsapp";
 
 export function CartDrawer() {
-  const { items, isOpen, total, eliminarItem, cerrarCarrito } = useCart();
+  const { items, isOpen, total, eliminarItem, cerrarCarrito, pedidosActivos } =
+    useCart();
   const [mostrarForm, setMostrarForm] = useState(false);
   const [tipo, setTipo] = useState<TipoPedido>("recoger");
   const pathname = usePathname();
@@ -123,6 +124,19 @@ export function CartDrawer() {
               </span>
             </div>
 
+            {!pedidosActivos && (
+              <p
+                className="rounded-lg px-3 py-2 text-center text-xs font-black uppercase tracking-wide"
+                style={{
+                  background: "rgba(245,192,24,0.12)",
+                  border: "1px solid rgba(245,192,24,0.5)",
+                  color: "#F5C018",
+                }}
+              >
+                🌭 Pedidos cerrados por ahora
+              </p>
+            )}
+
             {/* Tipo de pedido */}
             <div>
               <p className="mb-2 text-sm font-black text-white">
@@ -159,14 +173,18 @@ export function CartDrawer() {
               href={pedidoWhatsappLink(items, total)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center rounded-lg bg-yellow py-3 text-sm font-black uppercase tracking-wide text-bg transition-transform hover:scale-[1.02]"
+              aria-disabled={!pedidosActivos}
+              className={`flex w-full items-center justify-center rounded-lg bg-yellow py-3 text-sm font-black uppercase tracking-wide text-bg transition-transform hover:scale-[1.02] ${
+                pedidosActivos ? "" : "pointer-events-none opacity-40"
+              }`}
             >
               Pedir por WhatsApp
             </a>
             <button
               type="button"
               onClick={() => setMostrarForm(true)}
-              className="flex w-full items-center justify-center rounded-lg bg-brand py-3 text-sm font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-light"
+              disabled={!pedidosActivos}
+              className="flex w-full items-center justify-center rounded-lg bg-brand py-3 text-sm font-black uppercase tracking-wide text-white transition-colors hover:bg-brand-light disabled:cursor-not-allowed disabled:opacity-40"
             >
               Enviar pedido
             </button>
