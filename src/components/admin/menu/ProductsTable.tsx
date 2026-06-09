@@ -4,9 +4,16 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { EditProductModal } from "@/components/admin/menu/EditProductModal";
 import { ProductRow } from "@/components/admin/menu/ProductRow";
-import type { Producto } from "@/data/types";
+import type { Combo, Producto } from "@/data/types";
+import { formatPriceCOP } from "@/lib/format";
 
-export function ProductsTable({ productos }: { productos: Producto[] }) {
+export function ProductsTable({
+  productos,
+  combos = [],
+}: {
+  productos: Producto[];
+  combos?: Combo[];
+}) {
   const [editando, setEditando] = useState<Producto | null>(null);
   const [modalAbierto, setModalAbierto] = useState(false);
 
@@ -71,6 +78,50 @@ export function ProductsTable({ productos }: { productos: Producto[] }) {
           </p>
         )}
       </div>
+
+      {/* Combos (solo lectura) */}
+      {combos.length > 0 && (
+        <div>
+          <p
+            className="mb-2 mt-2 text-[11px] font-black uppercase tracking-widest"
+            style={{ color: "#888888" }}
+          >
+            Combos
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {combos.map((c) => (
+              <div
+                key={c.id}
+                className="p-4"
+                style={{
+                  background: "#111111",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(107,33,168,0.2)",
+                }}
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <h3 className="font-display text-lg tracking-wide text-white">
+                    {c.nombre}
+                  </h3>
+                  <span className="font-black" style={{ color: "#F5C018" }}>
+                    {formatPriceCOP(c.precio)}
+                  </span>
+                </div>
+                <p className="text-[11px] font-bold uppercase" style={{ color: "#555555" }}>
+                  {c.tier}
+                </p>
+                <ul className="mt-2 space-y-0.5">
+                  {c.combo_items.map((it) => (
+                    <li key={it.orden} className="text-xs font-bold text-white/80">
+                      · {it.texto}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {modalAbierto && (
         <EditProductModal

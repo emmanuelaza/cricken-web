@@ -3,6 +3,7 @@
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { StatusChanger } from "@/components/admin/pedidos/StatusChanger";
+import { TipoBadge } from "@/components/admin/pedidos/TipoBadge";
 import type { Pedido } from "@/data/types";
 import { formatFecha, formatPriceCOP } from "@/lib/format";
 
@@ -49,10 +50,20 @@ export function OrderDetail({ pedido }: { pedido: Pedido }) {
           <p className="font-display text-2xl tracking-wide text-white">
             {pedido.cliente_nombre}
           </p>
+          <div className="mt-2">
+            <TipoBadge tipo={pedido.tipo_pedido} />
+          </div>
           <div className="mt-3 space-y-1.5 text-sm font-bold text-white/90">
             <p>📱 {pedido.cliente_telefono}</p>
-            <p>📍 {pedido.sede}</p>
-            <p className="capitalize">🛵 Canal: {pedido.canal}</p>
+            {pedido.tipo_pedido === "domicilio" ? (
+              <>
+                <p>🛵 {pedido.direccion}</p>
+                <p>🏘️ {pedido.barrio}, Medellín</p>
+              </>
+            ) : (
+              <p>📍 Recoger en: {pedido.sede}</p>
+            )}
+            <p className="capitalize">📦 Canal: {pedido.canal}</p>
             <p style={{ color: "#888888" }}>🕐 {formatFecha(pedido.created_at)}</p>
           </div>
 

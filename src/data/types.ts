@@ -65,12 +65,16 @@ export interface PedidoProducto {
 }
 
 export type EstadoPedido = "nuevo" | "confirmado" | "entregado" | "cancelado";
+export type TipoPedido = "recoger" | "domicilio";
 
 export interface Pedido {
   id: string;
   cliente_nombre: string;
   cliente_telefono: string;
-  sede: string;
+  tipo_pedido: TipoPedido | string;
+  sede: string | null;
+  direccion: string | null;
+  barrio: string | null;
   productos: PedidoProducto[];
   total: number;
   estado: EstadoPedido | string;

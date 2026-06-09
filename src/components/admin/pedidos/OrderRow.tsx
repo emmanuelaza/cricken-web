@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { StatusChanger } from "@/components/admin/pedidos/StatusChanger";
+import { TipoBadge } from "@/components/admin/pedidos/TipoBadge";
 import type { Pedido } from "@/data/types";
 import { formatFecha, formatPriceCOP } from "@/lib/format";
 
@@ -24,8 +25,13 @@ export function OrderRow({ pedido }: { pedido: Pedido }) {
       <td className="px-3 py-3 font-black" style={{ color: "#F5C018" }}>
         {formatPriceCOP(pedido.total)}
       </td>
+      <td className="px-3 py-3">
+        <TipoBadge tipo={pedido.tipo_pedido} />
+      </td>
       <td className="px-3 py-3 font-bold" style={{ color: "#888888" }}>
-        {pedido.sede}
+        {pedido.tipo_pedido === "domicilio"
+          ? (pedido.barrio ?? "Domicilio")
+          : (pedido.sede ?? "—")}
       </td>
       <td className="px-3 py-3">
         <span

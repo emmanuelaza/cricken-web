@@ -3,19 +3,30 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import type { TipoPedido } from "@/data/types";
 import { formatCOP } from "@/lib/format";
 import { sedesFallback } from "@/lib/site";
 import { createClient } from "@/lib/supabase/client";
 
-export function OrderForm({ cerrarModal }: { cerrarModal: () => void }) {
+export function OrderForm({
+  tipo,
+  cerrarModal,
+}: {
+  tipo: TipoPedido;
+  cerrarModal: () => void;
+}) {
   const router = useRouter();
   // cerrarCarrito() del contexto cierra el drawer (el estado isOpen vive ahí
   // para que el botón flotante pueda abrirlo).
   const { items, total, limpiarCarrito, cerrarCarrito: cerrarDrawer } = useCart();
 
+  const esDomicilio = tipo === "domicilio";
+
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
   const [sede, setSede] = useState<string>(sedesFallback[0]);
+  const [direccion, setDireccion] = useState("");
+  const [barrio, setBarrio] = useState("");
   const [notas, setNotas] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -28,6 +39,10 @@ export function OrderForm({ cerrarModal }: { cerrarModal: () => void }) {
       setError("Nombre y teléfono son obligatorios.");
       return;
     }
+    if (esDomicilio && (!direccion.trim() || !barrio.trim())) {
+      setError("Dirección y barrio son obligatorios para domicilio.");
+      return;
+    }
 
     setEnviando(true);
 
@@ -38,19 +53,24 @@ export function OrderForm({ cerrarModal }: { cerrarModal: () => void }) {
     }));
     const nota = notas.trim() || null;
 
+    const payload = {
+      cliente_nombre: nombre,
+      cliente_telefono: telefono,
+      tipo_pedido: tipo,
+      productos: carrito,
+      total: total,
+      estado: "nuevo",
+      canal: "web",
+      notas: nota,
+      sede: esDomicilio ? null : sede,
+      direccion: esDomicilio ? direccion.trim() : null,
+      barrio: esDomicilio ? barrio.trim() : null,
+    };
+
     const supabase = createClient();
     const { data, error } = await supabase
       .from("pedidos")
-      .insert({
-        cliente_nombre: nombre,
-        cliente_telefono: telefono,
-        sede: sede,
-        productos: carrito,
-        total: total,
-        estado: "nuevo",
-        canal: "web",
-        notas: nota,
-      })
+      .insert(payload)
       .select()
       .single();
 
@@ -132,23 +152,68 @@ export function OrderForm({ cerrarModal }: { cerrarModal: () => void }) {
             />
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-black uppercase tracking-wide text-muted">
-              Sede para recoger *
-            </label>
-            <select
-              value={sede}
-              onChange={(e) => setSede(e.target.value)}
-              className={inputBase}
-              style={inputStyle}
-            >
-              {sedesFallback.map((s) => (
-                <option key={s} value={s} className="bg-bg">
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
+          {esDomicilio ? (
+            <>
+              <div>
+                <label className="mb-1.5 block text-sm font-black uppercase tracking-wide text-muted">
+                  Dirección completa *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={direccion}
+                  onChange={(e) => setDireccion(e.target.value)}
+                  placeholder="Ej: Calle 49 # 41-86, Apto 301"
+                  className={inputBase}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-black uppercase tracking-wide text-muted">
+                  Barrio *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={barrio}
+                  onChange={(e) => setBarrio(e.target.value)}
+                  placeholder="Ej: La Candelaria"
+                  className={inputBase}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-black uppercase tracking-wide text-muted">
+                  Ciudad
+                </label>
+                <input
+                  type="text"
+                  value="Medellín"
+                  readOnly
+                  className={`${inputBase} opacity-70`}
+                  style={inputStyle}
+                />
+              </div>
+            </>
+          ) : (
+            <div>
+              <label className="mb-1.5 block text-sm font-black uppercase tracking-wide text-muted">
+                Sede para recoger *
+              </label>
+              <select
+                value={sede}
+                onChange={(e) => setSede(e.target.value)}
+                className={inputBase}
+                style={inputStyle}
+              >
+                {sedesFallback.map((s) => (
+                  <option key={s} value={s} className="bg-bg">
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="mb-1.5 block text-sm font-black uppercase tracking-wide text-muted">
@@ -157,7 +222,11 @@ export function OrderForm({ cerrarModal }: { cerrarModal: () => void }) {
             <textarea
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              placeholder="Sin cebolla, extra salsa, etc."
+              placeholder={
+                esDomicilio
+                  ? "Ej: tocar timbre 2 veces"
+                  : "Sin cebolla, extra salsa, etc."
+              }
               rows={2}
               className={`${inputBase} resize-none`}
               style={inputStyle}

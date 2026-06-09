@@ -4,12 +4,14 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { OrderForm } from "@/components/Cart/OrderForm";
 import { useCart } from "@/context/CartContext";
+import type { TipoPedido } from "@/data/types";
 import { formatCOP } from "@/lib/format";
 import { pedidoWhatsappLink } from "@/lib/whatsapp";
 
 export function CartDrawer() {
   const { items, isOpen, total, eliminarItem, cerrarCarrito } = useCart();
   const [mostrarForm, setMostrarForm] = useState(false);
+  const [tipo, setTipo] = useState<TipoPedido>("recoger");
   const pathname = usePathname();
 
   // /menu-digital (solo informativo) y /admin (CRM) no llevan carrito.
@@ -121,6 +123,38 @@ export function CartDrawer() {
               </span>
             </div>
 
+            {/* Tipo de pedido */}
+            <div>
+              <p className="mb-2 text-sm font-black text-white">
+                ¿Cómo quieres tu pedido?
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {(
+                  [
+                    { v: "recoger", label: "🏪 Recoger en sede" },
+                    { v: "domicilio", label: "🛵 Domicilio" },
+                  ] as const
+                ).map((opt) => {
+                  const activo = tipo === opt.v;
+                  return (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => setTipo(opt.v)}
+                      className="rounded-lg py-2.5 text-xs font-black uppercase tracking-wide transition-colors"
+                      style={{
+                        background: activo ? "#6B21A8" : "#0A0A0A",
+                        color: activo ? "#FFFFFF" : "#888888",
+                        border: `1px solid ${activo ? "#6B21A8" : "rgba(107,33,168,0.3)"}`,
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <a
               href={pedidoWhatsappLink(items, total)}
               target="_blank"
@@ -140,7 +174,9 @@ export function CartDrawer() {
         )}
       </aside>
 
-      {mostrarForm && <OrderForm cerrarModal={() => setMostrarForm(false)} />}
+      {mostrarForm && (
+        <OrderForm tipo={tipo} cerrarModal={() => setMostrarForm(false)} />
+      )}
     </>
   );
 }

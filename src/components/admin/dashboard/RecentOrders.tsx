@@ -39,7 +39,7 @@ export function RecentOrders({ pedidos }: { pedidos: Pedido[] }) {
                   {p.cliente_nombre}
                 </span>
                 <span className="hidden font-bold sm:block" style={{ color: "#888888" }}>
-                  {p.sede}
+                  {p.sede ?? "🛵 Domicilio"}
                 </span>
                 <span className="font-black" style={{ color: "#F5C018" }}>
                   {formatPriceCOP(p.total)}

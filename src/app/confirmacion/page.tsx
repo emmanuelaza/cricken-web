@@ -37,7 +37,10 @@ export default async function ConfirmacionPage({
 
   const waHref = pedido
     ? pedidoWhatsappLink(pedido.productos, pedido.total, {
-        sede: pedido.sede,
+        sede:
+          pedido.tipo_pedido === "domicilio"
+            ? `Domicilio · ${pedido.direccion ?? ""}, ${pedido.barrio ?? ""}`
+            : (pedido.sede ?? undefined),
         nombre: pedido.cliente_nombre,
       })
     : `https://wa.me/${site.whatsapp}`;
@@ -97,7 +100,13 @@ export default async function ConfirmacionPage({
                 className="mt-5 space-y-1.5 pt-4 text-sm font-bold text-white/90"
                 style={{ borderTop: "1px solid rgba(107,33,168,0.2)" }}
               >
-                <p>📍 Sede: {pedido.sede}</p>
+                {pedido.tipo_pedido === "domicilio" ? (
+                  <p>
+                    🛵 Domicilio a: {pedido.direccion}, {pedido.barrio}, Medellín
+                  </p>
+                ) : (
+                  <p>📍 Recoger en: {pedido.sede}</p>
+                )}
                 <p>📱 Tel: {pedido.cliente_telefono}</p>
                 {pedido.notas && <p>📝 {pedido.notas}</p>}
               </div>

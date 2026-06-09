@@ -17,7 +17,11 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
   const [q, setQ] = useState("");
 
   const sedes = useMemo(
-    () => [...new Set(pedidos.map((p) => p.sede).filter(Boolean))],
+    () => [
+      ...new Set(
+        pedidos.map((p) => p.sede).filter((s): s is string => Boolean(s)),
+      ),
+    ],
     [pedidos],
   );
   const canales = useMemo(
@@ -110,10 +114,10 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
           border: "1px solid rgba(107,33,168,0.2)",
         }}
       >
-        <table className="w-full min-w-[760px] text-left text-sm">
+        <table className="w-full min-w-[860px] text-left text-sm">
           <thead>
             <tr style={{ color: "#555555" }}>
-              {["#Pedido", "Cliente", "Total", "Sede", "Canal", "Hora", "Estado", ""].map(
+              {["#Pedido", "Cliente", "Total", "Tipo", "Sede", "Canal", "Hora", "Estado", ""].map(
                 (h) => (
                   <th
                     key={h}
