@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { StatusChanger } from "@/components/admin/pedidos/StatusChanger";
+import { OrderStatusBadge } from "@/components/admin/pedidos/OrderStatusBadge";
 import { TipoBadge } from "@/components/admin/pedidos/TipoBadge";
 import type { Pedido } from "@/data/types";
 import { formatFecha, formatPriceCOP } from "@/lib/format";
@@ -12,11 +11,23 @@ const canalColor: Record<string, string> = {
   presencial: "#888888",
 };
 
-export function OrderRow({ pedido }: { pedido: Pedido }) {
+export function OrderRow({
+  pedido,
+  expanded,
+  onToggle,
+}: {
+  pedido: Pedido;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
   return (
     <tr
-      className="transition-colors hover:bg-[#222222]"
-      style={{ borderTop: "1px solid rgba(107,33,168,0.1)" }}
+      className="cursor-pointer transition-colors hover:bg-[#222222]"
+      style={{
+        borderTop: "1px solid rgba(107,33,168,0.1)",
+        background: expanded ? "#222222" : undefined,
+      }}
+      onClick={onToggle}
     >
       <td className="px-3 py-3 font-display tracking-wide" style={{ color: "#A855F7" }}>
         CR-{pedido.id.slice(0, 6).toUpperCase()}
@@ -45,16 +56,15 @@ export function OrderRow({ pedido }: { pedido: Pedido }) {
         {formatFecha(pedido.created_at)}
       </td>
       <td className="px-3 py-3">
-        <StatusChanger id={pedido.id} estado={pedido.estado} />
+        <OrderStatusBadge estado={pedido.estado} />
       </td>
       <td className="px-3 py-3 text-right">
-        <Link
-          href={`/admin/pedidos/${pedido.id}`}
-          className="rounded-md px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white transition-colors hover:bg-[#7C3AED]"
+        <span
+          className="rounded-md px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white"
           style={{ background: "#6B21A8" }}
         >
-          Ver
-        </Link>
+          {expanded ? "Cerrar" : "Ver"}
+        </span>
       </td>
     </tr>
   );

@@ -1,20 +1,33 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import { ExpandedOrderDetail } from "@/components/admin/pedidos/ExpandedOrderDetail";
 import { OrderRow } from "@/components/admin/pedidos/OrderRow";
-import type { Pedido } from "@/data/types";
+import { useToast } from "@/components/admin/Toast";
+import type { EstadoPedido, Pedido } from "@/data/types";
+import { createClient } from "@/lib/supabase/client";
 
 const selectStyle = {
   background: "#1A1A1A",
   border: "1px solid rgba(107,33,168,0.3)",
 } as const;
 
-export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
+const COLS = 9;
+
+export function OrdersTable({ pedidos: pedidosProp }: { pedidos: Pedido[] }) {
+  const toast = useToast();
+  const [pedidos, setPedidos] = useState<Pedido[]>(pedidosProp);
   const [estado, setEstado] = useState("");
   const [sede, setSede] = useState("");
   const [canal, setCanal] = useState("");
   const [q, setQ] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [guardandoId, setGuardandoId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPedidos(pedidosProp);
+  }, [pedidosProp]);
 
   const sedes = useMemo(
     () => [
@@ -46,29 +59,42 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
     });
   }, [pedidos, estado, sede, canal, q]);
 
+  const cambiarEstado = async (id: string, nuevo: EstadoPedido) => {
+    const previo = pedidos.find((p) => p.id === id)?.estado;
+    setGuardandoId(id);
+    setPedidos((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, estado: nuevo } : p)),
+    );
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("pedidos")
+      .update({ estado: nuevo })
+      .eq("id", id);
+    setGuardandoId(null);
+
+    if (error) {
+      setPedidos((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, estado: previo ?? p.estado } : p)),
+      );
+      toast("No se pudo actualizar el estado", "error");
+      return;
+    }
+    toast(`Pedido CR-${id.slice(0, 6).toUpperCase()} → ${nuevo}`, "success");
+  };
+
   return (
     <div className="space-y-4">
       {/* Filtros */}
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={estado}
-          onChange={(e) => setEstado(e.target.value)}
-          className="rounded-lg px-3 py-2 text-sm font-bold text-white"
-          style={selectStyle}
-        >
+        <select value={estado} onChange={(e) => setEstado(e.target.value)} className="rounded-lg px-3 py-2 text-sm font-bold text-white" style={selectStyle}>
           <option value="">Todos los estados</option>
           <option value="nuevo">Nuevo</option>
           <option value="confirmado">Confirmado</option>
           <option value="entregado">Entregado</option>
           <option value="cancelado">Cancelado</option>
         </select>
-
-        <select
-          value={sede}
-          onChange={(e) => setSede(e.target.value)}
-          className="rounded-lg px-3 py-2 text-sm font-bold text-white"
-          style={selectStyle}
-        >
+        <select value={sede} onChange={(e) => setSede(e.target.value)} className="rounded-lg px-3 py-2 text-sm font-bold text-white" style={selectStyle}>
           <option value="">Todas las sedes</option>
           {sedes.map((s) => (
             <option key={s} value={s}>
@@ -76,13 +102,7 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
             </option>
           ))}
         </select>
-
-        <select
-          value={canal}
-          onChange={(e) => setCanal(e.target.value)}
-          className="rounded-lg px-3 py-2 text-sm font-bold capitalize text-white"
-          style={selectStyle}
-        >
+        <select value={canal} onChange={(e) => setCanal(e.target.value)} className="rounded-lg px-3 py-2 text-sm font-bold capitalize text-white" style={selectStyle}>
           <option value="">Todos los canales</option>
           {canales.map((c) => (
             <option key={c} value={c}>
@@ -90,11 +110,7 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
             </option>
           ))}
         </select>
-
-        <div
-          className="ml-auto flex items-center gap-2 rounded-lg px-3 py-2"
-          style={selectStyle}
-        >
+        <div className="ml-auto flex items-center gap-2 rounded-lg px-3 py-2" style={selectStyle}>
           <Search size={15} style={{ color: "#888888" }} />
           <input
             value={q}
@@ -119,10 +135,7 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
             <tr style={{ color: "#555555" }}>
               {["#Pedido", "Cliente", "Total", "Tipo", "Sede", "Canal", "Hora", "Estado", ""].map(
                 (h) => (
-                  <th
-                    key={h}
-                    className="px-3 py-3 text-[11px] font-black uppercase tracking-widest"
-                  >
+                  <th key={h} className="px-3 py-3 text-[11px] font-black uppercase tracking-widest">
                     {h}
                   </th>
                 ),
@@ -131,16 +144,32 @@ export function OrdersTable({ pedidos }: { pedidos: Pedido[] }) {
           </thead>
           <tbody>
             {filtrados.map((p) => (
-              <OrderRow key={p.id} pedido={p} />
+              <Fragment key={p.id}>
+                <OrderRow
+                  pedido={p}
+                  expanded={expandedId === p.id}
+                  onToggle={() =>
+                    setExpandedId((cur) => (cur === p.id ? null : p.id))
+                  }
+                />
+                {expandedId === p.id && (
+                  <tr>
+                    <td colSpan={COLS} style={{ padding: 0 }}>
+                      <ExpandedOrderDetail
+                        pedido={p}
+                        guardando={guardandoId === p.id}
+                        onEstado={(nuevo) => cambiarEstado(p.id, nuevo)}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             ))}
           </tbody>
         </table>
 
         {filtrados.length === 0 && (
-          <p
-            className="px-5 py-8 text-center text-sm font-bold"
-            style={{ color: "#555555" }}
-          >
+          <p className="px-5 py-8 text-center text-sm font-bold" style={{ color: "#555555" }}>
             No hay pedidos que coincidan.
           </p>
         )}
