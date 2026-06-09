@@ -1,21 +1,31 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EditProductModal } from "@/components/admin/menu/EditProductModal";
 import { ProductRow } from "@/components/admin/menu/ProductRow";
+import { useToast } from "@/components/admin/Toast";
 import type { Combo, Producto } from "@/data/types";
 import { formatPriceCOP } from "@/lib/format";
+import { createClient } from "@/lib/supabase/client";
 
 export function ProductsTable({
-  productos,
+  productos: productosProp,
   combos = [],
 }: {
   productos: Producto[];
   combos?: Combo[];
 }) {
+  const toast = useToast();
+  const [lista, setLista] = useState<Producto[]>(productosProp);
   const [editando, setEditando] = useState<Producto | null>(null);
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [guardandoId, setGuardandoId] = useState<string | null>(null);
+
+  // Re-sincroniza cuando el server vuelve a enviar datos (p.ej. tras editar).
+  useEffect(() => {
+    setLista(productosProp);
+  }, [productosProp]);
 
   const abrirNuevo = () => {
     setEditando(null);
@@ -24,6 +34,40 @@ export function ProductsTable({
   const abrirEditar = (p: Producto) => {
     setEditando(p);
     setModalAbierto(true);
+  };
+
+  // Toggle activo/inactivo: actualiza el estado local al instante (sin refresh,
+  // porque la RLS de lectura oculta los inactivos) y persiste en Supabase.
+  const toggleActivo = async (producto: Producto) => {
+    const nuevo = !producto.activo;
+    setGuardandoId(producto.id);
+    setLista((prev) =>
+      prev.map((p) => (p.id === producto.id ? { ...p, activo: nuevo } : p)),
+    );
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("productos")
+      .update({ activo: nuevo })
+      .eq("id", producto.id);
+    console.log("Resultado:", error);
+    setGuardandoId(null);
+
+    if (error) {
+      // revertir
+      setLista((prev) =>
+        prev.map((p) =>
+          p.id === producto.id ? { ...p, activo: producto.activo } : p,
+        ),
+      );
+      toast("No se pudo cambiar: " + error.message, "error");
+      return;
+    }
+
+    toast(
+      nuevo ? "Producto activado ✅" : "Producto desactivado 🔴",
+      nuevo ? "success" : "error",
+    );
   };
 
   return (
@@ -50,11 +94,13 @@ export function ProductsTable({
         <table className="w-full min-w-[680px] text-left text-sm">
           <thead>
             <tr style={{ color: "#555555" }}>
-              {["Activo", "", "Nombre", "Categoría", "Precio", "Badge", ""].map(
+              {["", "Nombre", "Categoría", "Precio", "Badge", "Acciones"].map(
                 (h, i) => (
                   <th
                     key={i}
-                    className="px-3 py-3 text-[11px] font-black uppercase tracking-widest"
+                    className={`px-3 py-3 text-[11px] font-black uppercase tracking-widest ${
+                      h === "Acciones" ? "text-right" : ""
+                    }`}
                   >
                     {h}
                   </th>
@@ -63,13 +109,19 @@ export function ProductsTable({
             </tr>
           </thead>
           <tbody>
-            {productos.map((p) => (
-              <ProductRow key={p.id} producto={p} onEdit={abrirEditar} />
+            {lista.map((p) => (
+              <ProductRow
+                key={p.id}
+                producto={p}
+                guardando={guardandoId === p.id}
+                onEdit={abrirEditar}
+                onToggle={toggleActivo}
+              />
             ))}
           </tbody>
         </table>
 
-        {productos.length === 0 && (
+        {lista.length === 0 && (
           <p
             className="px-5 py-8 text-center text-sm font-bold"
             style={{ color: "#555555" }}
